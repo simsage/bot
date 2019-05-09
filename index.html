@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>chatbot</title>
+    <script src="js/jquery-3.4.0.js"></script>
+
+    <script src="js/sockjs.js"></script>
+    <script src="js/stomp.js"></script>
+
+    <script src="settings.js"></script>
+    <script src="js/bot.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="css/chatbox.css" />
+    <meta charset="UTF-8">
+</head>
+<body>
+
+<div>
+    <div class="hr"></div>
+</div>
+
+
+<div class="logo-container">
+    <img alt="SimSearch Logo" src="images/logo.svg" class="logo" />
+</div>
+
+
+<!-- ==============================================
+                   chat window
+=================================================== -->
+
+<div class="chat-main on_top">
+    <div class="chat-header">
+        <div class="header-one">
+            <div class="image-container"><img id="statusImage" src="images/green-button.svg" class="button-image" title="status" alt="status"/></div>
+            <div class="name white">
+                ask SimSage
+            </div>
+        </div>
+    </div>
+    <div class="chat-content">
+        <div class="chats" id="chat">
+        </div>
+        <div class="msg-box">
+            <div class="text-box">
+                <input type="text" id="query" onkeypress="keyPress(event)" class="text-input" placeholder="chat with SimSage" />
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script lang="JavaScript">
+
+    function update_ui(bot) {
+        console.log(bot);
+        $('#statusImage').attr('src', bot.is_connected ? "images/green-button.svg" : "images/red-button.svg");
+        $('#chat').html(bot.messageListToHtml());
+        if (bot.is_connected) {
+            $("#query").removeAttr("disabled");
+            $("#query").attr("placeholder", "chat with SimSage");
+        } else {
+            $("#query").attr("disabled", "true");
+            $("#query").attr("placeholder", "Not connected to SimSage...");
+        }
+
+        // scroll to the bottom
+        setTimeout(() => {
+            var element = document.getElementById('chat');
+            if (element) {
+                element.scrollTop = element.scrollHeight;
+            }
+        }, 100);
+
+    }
+
+    let bot = new Bot(settings, update_ui);
+    bot.ws_connect(); // connect to server
+
+    // minimize
+    $('.chat-content').slideToggle();
+
+    $('.chat-header').click(function(){
+        $('.chat-content').slideToggle();
+        $("#query").focus();
+    });
+
+    function keyPress(event) {
+        if (event.keyCode === 13) {
+            bot.reply_with_text($("#query").val());
+        }
+    }
+
+
+</script>
+
+</body>
+</html>

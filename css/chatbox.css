@@ -1,0 +1,134 @@
+/* -------------------------------------------------------------- */
+
+.logo-container {
+    margin-left: 20px;
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.logo {
+    width: 200px;
+}
+
+.on_top {
+    position: relative;
+    z-index: 9999;
+}
+
+.chat-main {
+    position: fixed;
+    width: 350px;
+    bottom: 0;
+    right: 100px;
+}
+
+.chat-header {
+    text-align: center;
+}
+
+.header-one {
+    background: #404040;
+    height: 45px;
+}
+
+.image-container {
+    margin-top: 8px;
+    margin-left: 10px;
+    float: left;
+}
+
+.button-image {
+    width: 24px;
+}
+
+.name {
+    display: inline-block;
+    margin-top: 12px;
+    font-size: 16px;
+    cursor: default;
+}
+
+.white {
+    color: #FFFFFF;
+}
+
+.msg-box {
+    background: #FFF;
+    font-size: 14px;
+}
+.msg-box input {
+    font-size: 14px;
+}
+.msg-box input:focus {
+    outline: none;
+}
+
+.text-box {
+    width: 100%;
+    height: 35px;
+    font-size: 1.2em;
+    background-color: #fafafa;
+}
+
+.text-input {
+    border: 0;
+    margin-top: 6px;
+    margin-left: 4%;
+    width: 95%;
+    background-color: #fafafa;
+}
+
+.chat-content {
+}
+
+.chats {
+    height: 285px;
+    overflow-x: hidden;
+    background: #ECEFF1;
+    position: relative;
+    top: 1px;
+}
+
+.chatbox_body_message {
+    position: relative;
+    width: 94%;
+    margin-left: 3%;
+}
+
+.chatbox_body_message p {
+    padding: 15px;
+    border-radius: 4px;
+    font-size: 14px;
+    background-color: #fff;
+    -webkit-box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
+    box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
+}
+
+.chatbox_body_message img {
+    width: 40px;
+    height: 40px;
+    position: absolute;
+    top: 5px;
+}
+
+.chatbox_body_message-right p {
+    margin-right: 15px;
+    padding-right: 30px;
+    text-align: right;
+    margin-bottom: 10px;
+}
+
+.chatbox_body_message-right img {
+    right: -5px;
+}
+
+.chatbox_body_message-left p {
+    margin-left: 15px;
+    padding-left: 30px;
+    text-align: left;
+    margin-bottom: 10px;
+}
+
+.chatbox_body_message-left img {
+    left: -5px;
+}
