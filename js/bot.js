@@ -5,14 +5,10 @@ class Bot {
         this.ws_base = settings.ws_base;
         this.update_ui = update_ui;
         this.settings = settings;
+	    this.is_connected = false;    // connected to endpoint?
+	    this.message_list = [];  // conversation list
+	    this.stompClient = null;
     }
-
-    is_connected = false;    // connected to endpoint?
-
-    message_list = [];  // conversation list
-
-    stompClient = null;
-
 
     // connect to the system
     ws_connect() {
