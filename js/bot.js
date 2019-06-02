@@ -8,6 +8,9 @@ class Bot {
 	    this.is_connected = false;    // connected to endpoint?
 	    this.message_list = [];  // conversation list
 	    this.stompClient = null;
+
+	    // could the bot answer the question
+        this.hasResult = true;
     }
 
     // connect to the system
@@ -34,6 +37,7 @@ class Bot {
 
     setConnected(is_connected) {
         this.is_connected = is_connected;
+        this.hasResult = true;
 
         if (!is_connected) {
             if (this.stompClient !== null) {
@@ -85,46 +89,66 @@ class Bot {
         return clientId;
     }
 
-    userMessageWrapper(text) {
-        return "                <div class=\"chatbox_body_message chatbox_body_message-right\">\n" +
-            "                    <img src=\"images/human.svg\" alt=\"you\">\n" +
-            "                    <p>" + text + "</p>\n" +
-            "                </div>\n"
+    static linksToHtml(urlList) {
+        let linkStr = "";
+        if (urlList) {
+            for (const url of urlList) {
+                linkStr += "<div class='link'><a href='" + url + "' target='_blank'>" + url + "</a></div>";
+            }
+        }
+        if (linkStr.length > 0) {
+            linkStr = "<br/><div class='link-box'>" + linkStr + "</div>";
+        }
+        return linkStr;
     }
 
-    simSageMessageWrapper(text) {
-        return "                <div class=\"chatbox_body_message chatbox_body_message-left\">\n" +
-            "                    <img src=\"images/tinman.svg\" alt=\"SimSage\">\n" +
-            "                    <p>" + text + "</p>\n" +
-            "                </div>\n"
+    static userMessageWrapper(text, urlList) {
+        return  "<div class=\"chatbox_body_message chatbox_body_message-right\">\n" +
+                "<img src=\"images/human.svg\" alt=\"you\">\n" +
+                "<div class='chatbox_body_inside'>" + text + Bot.linksToHtml(urlList) + "</div>" +
+                "</div>\n"
+    }
+
+    static simSageMessageWrapper(text, urlList) {
+        return  "<div class=\"chatbox_body_message chatbox_body_message-left\">\n" +
+                "<img src=\"images/tinman.svg\" alt=\"SimSage\">\n" +
+                "<div class='chatbox_body_inside'>" + text + Bot.linksToHtml(urlList) + "</div>" +
+                "</div>\n"
+    }
+
+    static systemBusyMessage() {
+        return  "<div class=\"busy-image-container\"><img class=\"busy-image\" src=\"images/dots.gif\" alt=\"Please wait\"></div>\n";
     }
 
     messageListToHtml() {
         var result = "";
+        let lastMessageUser = false;
         this.message_list.map((item) => {
             if (item.text && item.origin === "simsage") {
-                result += this.simSageMessageWrapper(item.text);
+                result += Bot.simSageMessageWrapper(item.text, item.urlList);
+                lastMessageUser = false;
             } else if (item.text) {
-                result += this.userMessageWrapper(item.text);
+                result += Bot.userMessageWrapper(item.text, item.urlList);
+                lastMessageUser = true;
             }
         });
+        if (lastMessageUser) {
+            result += Bot.systemBusyMessage();
+        }
         return result;
     }
 
     receiveData(data, origin) {
         if (data) {
-            console.log('received data:' + JSON.stringify(data));
-
+            this.hasResult = true;
             if (data.error && data.error.length > 0) {
                 this.showError("error", data.error);
 
             } else {
                 if (data.text && data.text.length > 0) {
-                    if (!origin) {
-                        this.message_list.push({"text": data.text, "origin": "simsage"});
-                    } else {
-                        this.message_list.push({"text": data.text, "origin": origin});
-                    }
+                    this.message_list.push({"text": data.text, "origin": "simsage",
+                        "urlList": data.urlList, "imageList": data.imageList});
+                    this.hasResult = data.hasResult;
                     this.refresh();
                 }
             }
@@ -143,6 +167,7 @@ class Bot {
                     numResults: 1,
                     scoreThreshold: 0.9
                 }));
+            this.hasResult = false;
             this.message_list.push({"text": text, "origin": "user"});
             this.refresh();
         }

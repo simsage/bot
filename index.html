@@ -63,6 +63,9 @@
             $("#query").attr("disabled", "true");
             $("#query").attr("placeholder", "Not connected to SimSage...");
         }
+        if (bot.hasResult) {
+            $("#query").val("");
+        }
 
         // scroll to the bottom
         setTimeout(() => {
