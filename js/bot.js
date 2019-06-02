@@ -151,8 +151,14 @@ class Bot {
         this.message_list.map((item) => {
             data.push([item.text, item.origin, item.time]);
         });
+        const downloadLink = document.createElement("a");
         const csv = Bot.convertToCSV(data);
-        window.open("data:text/csv;charset=utf-8," + escape(csv));
+        downloadLink.href = "data:text/csv;charset=utf-8," + escape(csv);
+        downloadLink.target = "_blank";
+        downloadLink.download = "conversation.csv";
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+        document.body.removeChild(downloadLink);
     }
 
     messageListToHtml() {

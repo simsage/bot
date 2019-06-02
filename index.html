@@ -36,7 +36,7 @@
             <div class="name white">
                 ask SimSage
             </div>
-            <div class="dl-conversation">
+            <div id="download-link" class="dl-conversation">
                 <a onclick="bot.downloadConversation(event)" target="_blank">
                     <img id="downloadImage" src="images/download.svg" class="download-image" title="download conversation" alt="download conversation"/>
                 </a>
@@ -69,6 +69,9 @@
         }
         if (bot.hasResult) {
             $("#query").val("");
+        }
+        if (bot.message_list.length >= 2) {
+            $("#download-link").show();
         }
 
         // scroll to the bottom

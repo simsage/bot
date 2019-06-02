@@ -154,6 +154,7 @@
     margin-top: 8px;
     width: 24px;
     float: right;
+    display: none;
 }
 
 .download-image {
