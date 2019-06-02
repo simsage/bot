@@ -149,3 +149,13 @@
     padding: 10px;
 }
 
+.dl-conversation {
+    margin-right: 8px;
+    margin-top: 8px;
+    width: 24px;
+    float: right;
+}
+
+.download-image {
+    width: 24px;
+}

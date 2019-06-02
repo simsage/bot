@@ -36,6 +36,11 @@
             <div class="name white">
                 ask SimSage
             </div>
+            <div class="dl-conversation">
+                <a onclick="bot.downloadConversation(event)" target="_blank">
+                    <img id="downloadImage" src="images/download.svg" class="download-image" title="download conversation" alt="download conversation"/>
+                </a>
+            </div>
         </div>
     </div>
     <div class="chat-content">
@@ -53,7 +58,6 @@
 <script lang="JavaScript">
 
     function update_ui(bot) {
-        console.log(bot);
         $('#statusImage').attr('src', bot.is_connected ? "images/green-button.svg" : "images/red-button.svg");
         $('#chat').html(bot.messageListToHtml());
         if (bot.is_connected) {

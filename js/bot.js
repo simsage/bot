@@ -11,6 +11,7 @@ class Bot {
 
 	    // could the bot answer the question
         this.hasResult = true;
+        this.hasError = false;
     }
 
     // connect to the system
@@ -38,6 +39,7 @@ class Bot {
     setConnected(is_connected) {
         this.is_connected = is_connected;
         this.hasResult = true;
+        this.hasError = false;
 
         if (!is_connected) {
             if (this.stompClient !== null) {
@@ -54,6 +56,7 @@ class Bot {
 
     sendMessage(endPoint, data) {
         if (this.is_connected) {
+            this.hasError = false;
             this.stompClient.send(endPoint, {}, JSON.stringify(data));
         }
     }
@@ -66,7 +69,10 @@ class Bot {
 
 
     showError(title, errStr) {
+        this.hasResult = false;
+        this.hasError = true;
         alert(errStr);
+        this.refresh();
     }
 
     // create a random guid
@@ -120,6 +126,35 @@ class Bot {
         return  "<div class=\"busy-image-container\"><img class=\"busy-image\" src=\"images/dots.gif\" alt=\"Please wait\"></div>\n";
     }
 
+    static convertToCSV(objArray) {
+        var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+        var str = '';
+        for (var i = 0; i < array.length; i++) {
+            var line = '';
+            for (const index in array[i]) {
+                if (line !=='') line += ',';
+                let text = array[i][index];
+                if (text && text.indexOf && text.indexOf(",") >= 0) {
+                    text = '"' + text + '"';
+                }
+                line += text;
+            }
+            str += line + '\r\n';
+        }
+        return str;
+    }
+
+    downloadConversation(event) {
+        event.stopPropagation();
+        // perpare the data
+        const data = [];
+        this.message_list.map((item) => {
+            data.push([item.text, item.origin, item.time]);
+        });
+        const csv = Bot.convertToCSV(data);
+        window.open("data:text/csv;charset=utf-8," + escape(csv));
+    }
+
     messageListToHtml() {
         var result = "";
         let lastMessageUser = false;
@@ -132,8 +167,9 @@ class Bot {
                 lastMessageUser = true;
             }
         });
-        if (lastMessageUser) {
+        if (lastMessageUser && !this.hasError) {
             result += Bot.systemBusyMessage();
+            console.log("has busy message");
         }
         return result;
     }
@@ -147,8 +183,9 @@ class Bot {
             } else {
                 if (data.text && data.text.length > 0) {
                     this.message_list.push({"text": data.text, "origin": "simsage",
-                        "urlList": data.urlList, "imageList": data.imageList});
+                        "urlList": data.urlList, "imageList": data.imageList, "time": new Date()});
                     this.hasResult = data.hasResult;
+                    this.hasError = false;
                     this.refresh();
                 }
             }
@@ -168,7 +205,8 @@ class Bot {
                     scoreThreshold: 0.9
                 }));
             this.hasResult = false;
-            this.message_list.push({"text": text, "origin": "user"});
+            this.hasError = false;
+            this.message_list.push({"text": text, "origin": "user", "time": new Date()});
             this.refresh();
         }
     }
