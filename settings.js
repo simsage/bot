@@ -9,8 +9,10 @@ settings = {
     // the organisation to search
     organisationId: "c276f883-e0c8-43ae-9119-df8b7df9c574",
     // the knowledge base inside that organisation to search
-    kbId: "676e2652-68cf-447a-9506-1fb56b732115",
+    kbId: "b673c223-56c5-436d-ab08-970bf2bed2b8",
     // the security-id of that knowledge base
-    sid: "fd111b0d-2403-99ed-5fd3-461ce516c75b",
+    sid: "0fbb8b7a-cd0f-0b77-b7b5-55f6836cc2b7",
+    // if we need to search - show this message
+    search_message: "Hmm.  I don't know that.  Hang on, I'll do a search for an answer.",
 };
 

@@ -131,13 +131,16 @@ class Bot {
         var str = '';
         for (var i = 0; i < array.length; i++) {
             var line = '';
-            for (const index in array[i]) {
-                if (line !=='') line += ',';
-                let text = array[i][index];
-                if (text && text.indexOf && text.indexOf(",") >= 0) {
-                    text = '"' + text + '"';
+            for (var j = 0; j < array[i].length; j++) {
+                if (line.length > 0) line += '\t';
+                var text = array[i][j];
+                if (text && text.replace) {
+                    line += text.replace(/\t/g, '    ')
+                        .replace(/\n/g, ' ')
+                        .replace(/\r/g, ' ');
+                } else {
+                    line += " ";
                 }
-                line += text;
             }
             str += line + '\r\n';
         }
@@ -180,16 +183,36 @@ class Bot {
         return result;
     }
 
+    static highlight(str) {
+        str = str.replace(/{hl1:}/g, "<span class='hl1'>");
+        str = str.replace(/{hl2:}/g, "<span class='hl2'>");
+        str = str.replace(/{hl3:}/g, "<span class='hl3'>");
+        str = str.replace(/{:hl1}/g, "</span>");
+        str = str.replace(/{:hl2}/g, "</span>");
+        str = str.replace(/{:hl3}/g, "</span>");
+        return str;
+    }
+
     receiveData(data, origin) {
         if (data) {
             this.hasResult = true;
             if (data.error && data.error.length > 0) {
                 this.showError("error", data.error);
-
             } else {
                 if (data.text && data.text.length > 0) {
-                    this.message_list.push({"text": data.text, "origin": "simsage",
-                        "urlList": data.urlList, "imageList": data.imageList, "time": new Date()});
+                    if (data.searchResult) {
+                        this.message_list.push({
+                            "text": settings.search_message,
+                            "origin": "simsage",
+                            "urlList": [],
+                            "imageList": [],
+                            "time": new Date()
+                        });
+                    }
+                    this.message_list.push({
+                        "text": Bot.highlight(data.text), "origin": "simsage",
+                        "urlList": data.urlList, "imageList": data.imageList, "time": new Date()
+                    });
                     this.hasResult = data.hasResult;
                     this.hasError = false;
                     this.refresh();

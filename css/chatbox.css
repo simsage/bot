@@ -17,7 +17,7 @@
 
 .chat-main {
     position: fixed;
-    width: 350px;
+    width: 450px;
     bottom: 0;
     right: 100px;
 }
@@ -91,7 +91,7 @@
 }
 
 .chats {
-    height: 285px;
+    height: 385px;
     overflow-x: hidden;
     background: #ECEFF1;
     position: relative;
@@ -160,3 +160,22 @@
 .download-image {
     width: 24px;
 }
+
+.hl1 {
+    font-weight: 700;
+    color: #000;
+    background-color: #eee;
+}
+
+.hl2 {
+    font-weight: 700;
+    color: #444;
+    background-color: #eee;
+}
+
+.hl3 {
+    font-weight: 700;
+    color: #666;
+    background-color: #eee;
+}
+
