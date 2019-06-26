@@ -1,4 +1,12 @@
 
+// message types for bot
+const mt_Typing = "typing";
+const mt_Disconnect = "disconnect";
+const mt_Error = "error";
+const mt_Message = "message";
+const mt_Email = "email";
+
+
 class Bot {
 
     constructor(settings, update_ui) {
@@ -12,6 +20,13 @@ class Bot {
 	    // could the bot answer the question
         this.hasResult = true;
         this.hasError = false;
+
+        // do we know this user's email?
+        this.knowEmail = false;
+        this.askForEmailAddress = false;
+
+        // is the operator busy typing?
+        this.operatorTyping = false;
     }
 
     // connect to the system
@@ -24,7 +39,6 @@ class Bot {
             this.stompClient.connect({},
                 function (frame) {
                     self.stompClient.subscribe('/chat/' + self.getClientId(), function (answer) {
-                        console.log('receiving');
                         self.receiveData(JSON.parse(answer.body));
                     });
                     self.setConnected(true);
@@ -50,6 +64,7 @@ class Bot {
             setTimeout(this.ws_connect.bind(this), 5000); // try and re-connect as a one-off in 5 seconds
         } else {
             console.log("ws-connected");
+            this.stompClient.debug = null;
         }
         this.refresh();
     }
@@ -123,7 +138,14 @@ class Bot {
     }
 
     static systemBusyMessage() {
-        return  "<div class=\"busy-image-container\"><img class=\"busy-image\" src=\"images/dots.gif\" alt=\"Please wait\"></div>\n";
+        return  "<div class=\"busy-image-container\"><img class=\"busy-image\" src=\"images/dots.gif\" alt=\"please wait\"></div>\n";
+    }
+
+    static systemGetUserEmail() {
+        return  "<div class=\"email-ask\">" + bot_settings.email_message + "\n" +
+                "<input class='email-address' id='email' onkeypress='bot.sendEmailKey(event)' type='text' placeholder='name@email.com' />" +
+                "<a class='send-email-button' onclick='bot.sendEmail()'><img class='send-email-image' src='images/chevron-right.svg' alt='more information' title='send me more information' /></a>" +
+                "</div>\n"
     }
 
     static convertToCSV(objArray) {
@@ -145,6 +167,31 @@ class Bot {
             str += line + '\r\n';
         }
         return str;
+    }
+
+    sendEmail() {
+        let emailAddress = $("#email").val();
+        if (emailAddress && emailAddress.length > 0 && emailAddress.indexOf("@") > 0) {
+            this.stompClient.send("/ws/ops/email", {},
+                JSON.stringify({
+                    'messageType': mt_Email,
+                    'securityId': settings.sid,
+                    'organisationId': settings.organisationId,
+                    'kbId': settings.kbId,
+                    'clientId': this.getClientId(),
+                    'emailAddress': emailAddress,
+                }));
+            this.hasResult = false;
+            this.hasError = false;
+            this.knowEmail = true;
+            this.refresh();
+        }
+    }
+
+    sendEmailKey(event) {
+        if (event && event.keyCode === 13) {
+            this.sendEmail();
+        }
     }
 
     downloadConversation(event) {
@@ -176,9 +223,11 @@ class Bot {
                 lastMessageUser = true;
             }
         });
-        if (lastMessageUser && !this.hasError) {
+        if (lastMessageUser && !this.hasError && this.operatorTyping) {
             result += Bot.systemBusyMessage();
-            console.log("has busy message");
+        }
+        if (this.askForEmailAddress) {
+            result += Bot.systemGetUserEmail();
         }
         return result;
     }
@@ -196,13 +245,22 @@ class Bot {
     receiveData(data, origin) {
         if (data) {
             this.hasResult = true;
-            if (data.error && data.error.length > 0) {
+            if (data.messageType === mt_Error && data.error.length > 0) {
                 this.showError("error", data.error);
+
             } else {
-                if (data.text && data.text.length > 0) {
+
+                // operator is typing message received
+                if (data.messageType === mt_Typing) {
+                    this.operatorTyping = data.operatorTyping;
+                    this.hasResult = false;
+                    this.refresh();
+
+                } else if (data.messageType === mt_Message) {
+
                     if (data.searchResult) {
                         this.message_list.push({
-                            "text": settings.search_message,
+                            "text": bot_settings.search_message,
                             "origin": "simsage",
                             "urlList": [],
                             "imageList": [],
@@ -215,6 +273,10 @@ class Bot {
                     });
                     this.hasResult = data.hasResult;
                     this.hasError = false;
+
+                    // do we want to ask for their email address?
+                    this.askForEmailAddress = !this.hasResult && !this.knowEmail;
+
                     this.refresh();
                 }
             }
@@ -225,10 +287,11 @@ class Bot {
         if (this.is_connected && text.length > 0) {
             this.stompClient.send("/ws/ops/query", {},
                 JSON.stringify({
+                    'messageType': mt_Message,
                     'securityId': settings.sid,
                     'organisationId': settings.organisationId,
                     'kbId': settings.kbId,
-                    'customerId': this.getClientId(),
+                    'clientId': this.getClientId(),
                     'query': text,
                     numResults: 1,
                     scoreThreshold: 0.9
