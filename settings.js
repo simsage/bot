@@ -8,9 +8,7 @@ settings = {
     ws_base: 'https://cloud.simsage.nz/ws-api',
     // the organisation to search
     organisationId: "<organisation>",
-    // the knowledge base inside that organisation to search
-    kbId: "<kb>",
-    // the security-id of that knowledge base
-    sid: "<sid>",
+    // the knowledge bases inside this organisation to use
+    kbList: [{kbId: "<kb>", sid: "<sid>"}],
 };
 

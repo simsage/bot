@@ -6,6 +6,8 @@ const mt_Error = "error";
 const mt_Message = "message";
 const mt_Email = "email";
 
+const typingCheckRate = 2000;
+
 
 class Bot {
 
@@ -27,6 +29,10 @@ class Bot {
 
         // is the operator busy typing?
         this.operatorTyping = false;
+
+        // typing checking
+        this.typing_timer = null;
+        this.typing_last_seen = 0;
     }
 
     // connect to the system
@@ -62,6 +68,10 @@ class Bot {
             }
             console.log("ws-disconnected");
             setTimeout(this.ws_connect.bind(this), 5000); // try and re-connect as a one-off in 5 seconds
+
+            // checking typing timeout
+            this.typing_timer = setInterval(this.typingTick.bind(this), typingCheckRate);
+
         } else {
             console.log("ws-connected");
             this.stompClient.debug = null;
@@ -73,6 +83,14 @@ class Bot {
         if (this.is_connected) {
             this.hasError = false;
             this.stompClient.send(endPoint, {}, JSON.stringify(data));
+        }
+    }
+
+    // is the operator still typing?
+    typingTick() {
+        if (this.operatorTyping && (this.typing_last_seen + typingCheckRate) < new Date().getTime()) {
+            this.operatorTyping = false;
+            this.refresh();
         }
     }
 
@@ -175,9 +193,8 @@ class Bot {
             this.stompClient.send("/ws/ops/email", {},
                 JSON.stringify({
                     'messageType': mt_Email,
-                    'securityId': settings.sid,
                     'organisationId': settings.organisationId,
-                    'kbId': settings.kbId,
+                    'kbList': settings.kbList,
                     'clientId': this.getClientId(),
                     'emailAddress': emailAddress,
                 }));
@@ -252,8 +269,10 @@ class Bot {
 
                 // operator is typing message received
                 if (data.messageType === mt_Typing) {
-                    this.operatorTyping = data.operatorTyping;
+                    this.operatorTyping = true;
+                    this.typing_last_seen = new Date().getTime();
                     this.hasResult = false;
+                    this.askForEmailAddress = false;
                     this.refresh();
 
                 } else if (data.messageType === mt_Message) {
@@ -274,6 +293,10 @@ class Bot {
                     this.hasResult = data.hasResult;
                     this.hasError = false;
 
+                    if (!this.knowEmail && data.knowEmail) {
+                        this.knowEmail = data.knowEmail;
+                    }
+
                     // do we want to ask for their email address?
                     this.askForEmailAddress = !this.hasResult && !this.knowEmail;
 
@@ -288,9 +311,8 @@ class Bot {
             this.stompClient.send("/ws/ops/query", {},
                 JSON.stringify({
                     'messageType': mt_Message,
-                    'securityId': settings.sid,
                     'organisationId': settings.organisationId,
-                    'kbId': settings.kbId,
+                    'kbList': settings.kbList,
                     'clientId': this.getClientId(),
                     'query': text,
                     numResults: 1,
@@ -298,6 +320,7 @@ class Bot {
                 }));
             this.hasResult = false;
             this.hasError = false;
+            this.askForEmailAddress = false;
             this.message_list.push({"text": text, "origin": "user", "time": new Date()});
             this.refresh();
         }
