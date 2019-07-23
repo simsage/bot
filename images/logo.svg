@@ -12,7 +12,7 @@
    radial=""
    version="1.1"
    id="svg4049"
-   sodipodi:docname="simsage-logo.svg"
+   sodipodi:docname="logo.svg"
    inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
    width="30mm"
    height="10mm">
@@ -73,12 +73,12 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:window-width="1920"
-     inkscape:window-height="966"
+     inkscape:window-height="1016"
      id="namedview4051"
      showgrid="false"
-     inkscape:zoom="2.075"
-     inkscape:cx="-14.136694"
-     inkscape:cy="-33.013168"
+     inkscape:zoom="8"
+     inkscape:cx="67.223246"
+     inkscape:cy="4.5591212"
      inkscape:window-x="0"
      inkscape:window-y="27"
      inkscape:window-maximized="1"
@@ -140,13 +140,13 @@
     <text
        transform="scale(0.98288338,1.0174147)"
        id="text909"
-       y="32.96701"
-       x="65.589348"
+       y="32.475571"
+       x="65.970879"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21px;line-height:1.25;font-family:FreeSans;-inkscape-font-specification:'FreeSans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#000000;fill-opacity:1;stroke:none;stroke-width:0.6513986"
        xml:space="preserve"><tspan
          style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:21px;font-family:FreeSans;-inkscape-font-specification:'FreeSans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;stroke-width:0.6513986"
-         y="32.96701"
-         x="65.589348"
+         y="32.475571"
+         x="65.970879"
          id="tspan907"
          sodipodi:role="line">Sage</tspan></text>
   </g>

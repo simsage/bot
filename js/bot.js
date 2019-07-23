@@ -256,6 +256,7 @@ class Bot {
         str = str.replace(/{:hl1}/g, "</span>");
         str = str.replace(/{:hl2}/g, "</span>");
         str = str.replace(/{:hl3}/g, "</span>");
+        str = str.replace(/\n/g, "<br />");
         return str;
     }
 
@@ -298,7 +299,7 @@ class Bot {
                     }
 
                     // do we want to ask for their email address?
-                    this.askForEmailAddress = !this.hasResult && !this.knowEmail;
+                    this.askForEmailAddress = !this.hasResult && !this.knowEmail && bot_settings.ask_email;
 
                     this.refresh();
                 }
@@ -314,6 +315,7 @@ class Bot {
                     'organisationId': settings.organisationId,
                     'kbList': settings.kbList,
                     'clientId': this.getClientId(),
+                    'semanticSearch': bot_settings.semantic_search,
                     'query': text,
                     numResults: 1,
                     scoreThreshold: 0.9
