@@ -33,6 +33,26 @@ class Bot {
         // typing checking
         this.typing_timer = null;
         this.typing_last_seen = 0;
+
+        this.selected_kb = null;
+        this.selected_kbId = null;
+        this.selected_sid = null;
+    }
+
+    selectSource(name, kbId, sid) {
+        this.selected_kb = name;
+        this.selected_kbId = kbId;
+        this.selected_sid = sid;
+        this.message_list = [];  // reset conversation list
+        this.refresh();
+    }
+
+    clearSource() {
+        this.selected_kb = null;
+        this.selected_kbId = null;
+        this.selected_sid = null;
+        this.message_list = [];  // reset conversation list
+        this.refresh();
     }
 
     // connect to the system
@@ -166,6 +186,16 @@ class Bot {
                 "</div>\n"
     }
 
+    static sourcesTitle() {
+        return  "<div class=\"source-title\">please select a topic</div>\n"
+    }
+
+    static sourceItem(sourceItem) {
+        return  "<div class=\"source-item\" onclick='bot.selectSource(\"" + sourceItem.name + "\",\"" + sourceItem.kbId + "\",\"" + sourceItem.sid + "\");'>\n" +
+                sourceItem.name +
+                "</div>\n"
+    }
+
     static convertToCSV(objArray) {
         var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
         var str = '';
@@ -194,7 +224,7 @@ class Bot {
                 JSON.stringify({
                     'messageType': mt_Email,
                     'organisationId': settings.organisationId,
-                    'kbList': settings.kbList,
+                    'kbList': [{kbId: this.selected_kbId, sid: this.selected_sid}],
                     'clientId': this.getClientId(),
                     'emailAddress': emailAddress,
                 }));
@@ -229,6 +259,25 @@ class Bot {
     }
 
     messageListToHtml() {
+
+        // are we still selecting a chat topic?
+        if (this.selected_kb === null) {
+
+            if (settings.kbList.length === 1) {
+
+                this.selected_kb = settings.kbList[0].name;
+                this.selected_kbId = settings.kbList[0].kbId;
+                this.selected_sid = settings.kbList[0].sid;
+
+            } else if (settings.kbList.length > 1) {
+                let str = Bot.sourcesTitle();
+                for (const kb of settings.kbList) {
+                    str += Bot.sourceItem(kb);
+                }
+                return str;
+            }
+        }
+
         var result = "";
         let lastMessageUser = false;
         this.message_list.map((item) => {
@@ -247,6 +296,17 @@ class Bot {
             result += Bot.systemGetUserEmail();
         }
         return result;
+    }
+
+    // setup a chat topic?
+    setupChatTopic() {
+        if (this.selected_kb !== null) {
+            return "<div class='chat-topic-text'>" + this.selected_kb +
+                "</div><div class='chat-topic-image-container' onclick='bot.clearSource();'>" +
+                "<img src='images/cross.svg' class='chat-topic-image' alt='change topic' title='change topic' />" +
+                "</div>";
+        }
+        return "";
     }
 
     static highlight(str) {

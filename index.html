@@ -45,6 +45,11 @@
         </div>
     </div>
     <div class="chat-content">
+        <div class="chat-cover">
+            <div class="chat-topic" id="chat-topic">
+            </div>
+            <br clear="both" />
+        </div>
         <div class="chats" id="chat">
         </div>
         <div class="msg-box">
@@ -61,12 +66,24 @@
     function update_ui(bot) {
         $('#statusImage').attr('src', bot.is_connected ? "images/green-button.svg" : "images/red-button.svg");
         $('#chat').html(bot.messageListToHtml());
+        $("#chat-topic").html(bot.setupChatTopic());
+
         if (bot.is_connected) {
-            $("#query").removeAttr("disabled");
-            $("#query").attr("placeholder", "chat with SimSage");
+            if (bot.selected_kb === null) {
+                $("#query").attr("disabled", "true");
+                $("#query").attr("placeholder", "please select a topic...");
+                $(".chat-cover").hide();
+            } else {
+                $("#query").removeAttr("disabled");
+                $("#query").attr("placeholder", "chat with SimSage");
+                if (settings.kbList.length > 1) {
+                    $(".chat-cover").show();
+                }
+            }
         } else {
             $("#query").attr("disabled", "true");
             $("#query").attr("placeholder", "Not connected to SimSage...");
+            $(".chat-cover").hide();
         }
         if (bot.hasResult) {
             $("#query").val("");

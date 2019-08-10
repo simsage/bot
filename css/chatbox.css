@@ -213,3 +213,50 @@
     border-radius: 2px;
     background-color: #4CAF50;
 }
+
+.source-title {
+    text-align: center;
+    padding: 10px;
+    font-weight: 600;
+    font-size: 1.1em;
+}
+
+.source-item {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.95em;
+    background: #4C50AF;
+    color: #ffffe0;
+    border-radius: 5px;
+    width: 60%;
+    margin-left: 20%;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.chat-cover {
+    float: none;
+    display: none;
+    background: #E4E4E4;
+    width: 100%;
+}
+
+.chat-topic-text {
+    float: left;
+    margin-top: 4px;
+    margin-left: 20px;
+    padding: 5px;
+    font-weight: 600;
+    font-size: 0.9em;
+}
+
+.chat-topic-image-container {
+    float: right;
+}
+
+.chat-topic-image {
+    margin-top: 4px;
+    margin-right: 10px;
+    width: 24px;
+}
+
