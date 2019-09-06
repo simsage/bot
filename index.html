@@ -11,6 +11,9 @@
     <script src="bot_settings.js"></script>
     <script src="js/bot.js"></script>
 
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+    <link rel="stylesheet" type="text/css" href="css/framework.css" />
     <link rel="stylesheet" type="text/css" href="css/chatbox.css" />
     <meta charset="UTF-8">
 </head>
@@ -20,107 +23,38 @@
     <div class="hr"></div>
 </div>
 
+    <div class="logo-container">
+        <img alt="SimSearch Logo" src="images/logo.svg" class="logo" />
+    </div>
 
-<div class="logo-container">
-    <img alt="SimSearch Logo" src="images/logo.svg" class="logo" />
-</div>
-
-
-<!-- ==============================================
-                   chat window
-=================================================== -->
-
-<div class="chat-main on_top">
-    <div class="chat-header">
-        <div class="header-one">
-            <div class="image-container"><img id="statusImage" src="images/green-button.svg" class="button-image" title="status" alt="status"/></div>
-            <div class="name white">
-                ask SimSage
+    <!-- SimSage Bot Begin -->
+    <div class="chat-main on_top">
+        <div class="chat-header">
+            <div class="header-one">
+                <div id="status" class="simsage-disconnected" title="SimSage is offline"></div>
+                <div class="name white">Ask SimSage</div>
+                <div id="voice" onclick="return bot.toggleVoice(event)"></div>
+                <div id="download-link" class="download" title="download your conversation" title="download conversation"
+                     onclick="return bot.downloadConversation(event)" style="display: none;">
+                </div>
             </div>
-            <div id="download-link" class="dl-conversation">
-                <a onclick="bot.downloadConversation(event)" target="_blank">
-                    <img id="downloadImage" src="images/download.svg" class="download-image" title="download conversation" alt="download conversation"/>
-                </a>
+        </div>
+        <div class="chat-content">
+            <div class="chat-cover">
+                <div class="chat-topic" id="chat-topic">
+                </div>
+            </div>
+            <div style="clear: both;"></div>
+            <div class="chats" id="chat">
+            </div>
+            <div class="msg-box">
+                <div class="text-box">
+                    <input type="text" id="query" onkeypress="keyPress(event)" class="text-input" placeholder="please wait, connecting..." disabled />
+                </div>
             </div>
         </div>
     </div>
-    <div class="chat-content">
-        <div class="chat-cover">
-            <div class="chat-topic" id="chat-topic">
-            </div>
-            <br clear="both" />
-        </div>
-        <div class="chats" id="chat">
-        </div>
-        <div class="msg-box">
-            <div class="text-box">
-                <input type="text" id="query" onkeypress="keyPress(event)" class="text-input" placeholder="please wait, connecting..." disabled />
-            </div>
-        </div>
-    </div>
-</div>
-
-
-<script lang="JavaScript">
-
-    function update_ui(bot) {
-        $('#statusImage').attr('src', bot.is_connected ? "images/green-button.svg" : "images/red-button.svg");
-        $('#chat').html(bot.messageListToHtml());
-        $("#chat-topic").html(bot.setupChatTopic());
-
-        if (bot.is_connected) {
-            if (bot.selected_kb === null) {
-                $("#query").attr("disabled", "true");
-                $("#query").attr("placeholder", "please select a topic...");
-                $(".chat-cover").hide();
-            } else {
-                $("#query").removeAttr("disabled");
-                $("#query").attr("placeholder", "chat with SimSage");
-                if (settings.kbList.length > 1) {
-                    $(".chat-cover").show();
-                }
-            }
-        } else {
-            $("#query").attr("disabled", "true");
-            $("#query").attr("placeholder", "Not connected to SimSage...");
-            $(".chat-cover").hide();
-        }
-        if (bot.hasResult) {
-            $("#query").val("");
-        }
-        if (bot.message_list.length >= 2) {
-            $("#download-link").show();
-        }
-
-        // scroll to the bottom
-        setTimeout(() => {
-            var element = document.getElementById('chat');
-            if (element) {
-                element.scrollTop = element.scrollHeight;
-            }
-        }, 100);
-
-    }
-
-    let bot = new Bot(settings, update_ui);
-    bot.ws_connect(); // connect to server
-
-    // minimize
-    $('.chat-content').slideToggle();
-
-    $('.chat-header').click(function(){
-        $('.chat-content').slideToggle();
-        $("#query").focus();
-    });
-
-    function keyPress(event) {
-        if (event.keyCode === 13) {
-            bot.reply_with_text($("#query").val());
-        }
-    }
-
-
-</script>
-
+    <script src="js/startup.js"></script>
+    <!-- SimSage Bot End -->
 </body>
 </html>
