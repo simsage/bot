@@ -1,14 +1,3 @@
-/* -------------------------------------------------------------- */
-
-.logo-container {
-    margin-left: 20px;
-    margin-top: 23px;
-}
-
-.logo {
-    width: 140px;
-}
-
 .on_top {
     position: relative;
     z-index: 9999;
@@ -16,66 +5,55 @@
 
 .chat-main {
     position: fixed;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    line-height: 26px;
     width: 450px;
     bottom: 0;
     right: 100px;
 }
 
-.chat-header {
-    text-align: center;
+@media only screen and (max-width: 450px) {
+    .chat-main {
+        position: fixed;
+        width: 100%;
+        bottom: 0;
+        right: 0;
+    }
 }
 
-.busy-image-container {
-    margin-left: 20px;
-    width: 60px;
+.chat-content {
+    height: 400px;
+    width: 100%;
 }
 
-.busy-image {
-    width: 60px;
-}
-
-.header-one {
-    background: #404040;
-    height: 45px;
+.chats {
+    height: 365px;
+    overflow-x: hidden;
+    position: relative;
+    top: 1px;
 }
 
 .image-container {
-    margin-top: 8px;
+    margin-top: 2px;
     margin-left: 10px;
+    margin-right: 20px;
     float: left;
-}
-
-.button-image {
-    width: 24px;
 }
 
 .name {
     display: inline-block;
-    margin-top: 12px;
+    margin-top: 6px;
     font-size: 16px;
     cursor: default;
 }
 
-.white {
-    color: #FFFFFF;
-}
-
-.msg-box {
-    background: #FFF;
-    font-size: 14px;
-}
-.msg-box input {
-    font-size: 14px;
-}
 .msg-box input:focus {
     outline: none;
 }
 
 .text-box {
     width: 100%;
-    height: 35px;
-    font-size: 1.2em;
-    background-color: #fafafa;
 }
 
 .text-input {
@@ -83,133 +61,307 @@
     margin-top: 6px;
     margin-left: 4%;
     width: 95%;
-    background-color: #fafafa;
 }
 
-.chat-content {
-}
-
-.chats {
-    height: 385px;
-    overflow-x: hidden;
-    background: #ECEFF1;
-    position: relative;
-    top: 1px;
+.chat-topic {
+    clear: both;
+    margin-top: 20px;
 }
 
 .chatbox_body_message {
     position: relative;
     width: 94%;
     margin-left: 3%;
+}
+
+.bot-message {
+    padding: 20px;
     margin-bottom: 10px;
 }
 
-.chatbox_body_inside {
-    padding: 15px;
-    margin-left: 30px;
-    margin-right: 30px;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: #fff;
-    -webkit-box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
-    box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
-}
-
-.chatbox_body_message img {
-    width: 40px;
-    height: 40px;
-    position: absolute;
-    top: 5px;
-}
-
-.chatbox_body_message-right p {
-    margin-right: 15px;
+.chatbox_body_message-right .bot-message {
+    margin-left: 15px;
     padding-right: 30px;
     text-align: right;
-    margin-bottom: 10px;
 }
 
-.chatbox_body_message-right img {
-    right: -5px;
-}
 
-.chatbox_body_message-left p {
-    margin-left: 15px;
+.chatbox_body_message-left .bot-message {
+    margin-right: 15px;
     padding-left: 30px;
     text-align: left;
-    margin-bottom: 10px;
 }
 
-.chatbox_body_message-left img {
-    left: -5px;
-}
 
-.link {
-    padding: 10px;
-}
 
-.dl-conversation {
-    margin-right: 8px;
-    margin-top: 8px;
-    width: 24px;
-    float: right;
+.chat-cover {
+    float: left;
     display: none;
+    background: #E4E4E4;
+    width: 100%;
 }
 
-.download-image {
-    width: 24px;
+.chat-topic-text {
+    float: left;
+    padding: 4px;
+    margin-top: -16px;
+    margin-left: 20px;
+    font-weight: 600;
+    font-size: 0.9em;
 }
 
-.hl1 {
-    font-weight: 700;
-    color: #000;
-    background-color: #eee;
+.chat-topic-clear {
+    float: right;
 }
 
-.hl2 {
-    font-weight: 700;
-    color: #444;
-    background-color: #eee;
+.chat-topic-clear:before {
+    margin-top: -20px;
+    margin-right: 2px;
+    font-family: 'Material Icons', serif;
+    font-size: 25px;
+    float: left;
+    color: #b3b3b3;
+    content: '\e5c9';
 }
 
-.hl3 {
-    font-weight: 700;
-    color: #666;
-    background-color: #eee;
+/* Connection Status Begin */
+.bot-connected, .bot-disconnected {
+  color: white;
+  float: left;
+  margin-top: 2px;
+  padding-right: 5px;
 }
 
+/* Connection Status End */
+
+/* Voice Begin */
+.bot-voice-enabled {
+  font-family: 'Material Icons', serif;
+  color: #b3b3b3;
+  float: right;
+  margin-top: 6px;
+  margin-right: 4px;
+  padding-right: 10px;
+}
+
+.bot-voice-disabled {
+  font-family: 'Material Icons', serif;
+  color: #b3b3b3;
+  float: right;
+  margin-top: 6px;
+  margin-right: 4px;
+  padding-right: 10px;
+}
+
+.bot-voice-enabled:before {
+  font-size: 25px;
+  content: '\e050';
+}
+
+.bot-voice-disabled:before {
+  font-size: 25px;
+  content: '\e04f';
+}
+
+/* Voice End */
+
+/* connected / disconnected Start */
+
+.simsage-connected {
+  font-family: 'Material Icons', serif;
+  font-size: 25px;
+  float: left;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.simsage-disconnected {
+  font-family: 'Material Icons', serif;
+  font-size: 25px;
+  float: left;
+  padding: 5px;
+  margin-right: 10px;
+}
+
+.simsage-connected:before {
+  color: #5CAF90;
+  content: '\e2bf';
+}
+
+.simsage-disconnected:before {
+  color: #f05050;
+  content: '\e2c1';
+}
+
+/* connected / disconnected End */
+
+
+
+/* Download Start  */
+
+.download {
+  font-family: 'Material Icons', serif;
+  font-size: 25px;
+  float: right;
+  margin-top: 2px;
+  padding-top: 5px;
+  padding-right: 10px;
+}
+
+.download:before {
+  color: #b3b3b3;
+  content: '\e2c0';
+}
+
+/* Download End */
+
+
+/* Communicators Start */
+.bot-human {
+  font-size: 40px;
+  text-shadow: 2px 2px 4px white;
+  padding-right: 5px;
+}
+
+.bot-machine {
+  font-size: 35px;
+  text-shadow: 2px 2px 4px white;
+  padding-right: 5px;
+}
+
+.bot-human:before {
+  padding-top: 15px;
+  margin-right: -20px;
+  font-family: 'Material Icons', serif;
+  float: right;
+  color: dodgerblue;
+  content: '\e853';
+}
+
+.bot-machine:before {
+  padding-top: 15px;
+  padding-left: 2px;
+  margin-left: -10px;
+  font-family: 'Material Icons', serif;
+  float: left;
+  color: dodgerblue;
+  content: '\e859';
+}
+
+.chatbox_body_message-right .bot-message {
+  padding-right: 50px;
+}
+
+.chatbox_body_message-left .bot-message {
+  padding-left: 50px;
+}
+
+/* Communicators End */
+
+
+/* ask email box Start */
 
 .email-ask {
-    margin-top: 10px;
-    padding: 15px;
-    margin-left: 30px;
-    margin-right: 30px;
-    border-radius: 4px;
-    font-size: 14px;
-    background-color: #fff;
-    -webkit-box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
-    box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
+  width: 90%;
+  margin-top: 10px;
+  padding: 15px;
+  margin-left: 10px;
+  margin-right: 30px;
+  border-radius: 4px;
+  font-size: 14px;
+  height: 120px;
+  background-color: #fff;
+  -webkit-box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
+  box-shadow: 1px 1px rgba(100, 100, 100, 0.1);
 }
 
 .email-address {
-    padding: 5px;
-    margin-left: 10px;
-    margin-top: 10px;
-    font-size: 14px;
-    width: 70%;
-    background-color: #fff;
+  padding: 5px;
+  float: left;
+  margin-left: 10px;
+  margin-top: 10px;
+  font-size: 14px;
+  width: 70%;
+  background-color: #fff;
 }
 
 .send-email-button {
-    float: right;
-    margin-top: 12px;
-    margin-right: 50px;
+  float: right;
+  margin-top: 12px;
+  margin-right: 50px;
 }
 
-.send-email-image {
-    width: 24px;
-    padding: 2px;
-    color: #fff;
-    border-radius: 2px;
-    background-color: #4CAF50;
+.send-email-button:before {
+  float: right;
+  color: #f05050;
+  font-family: 'Material Icons', serif;
+  font-size: 35px !important;
+  content: '\e0be';
+}
+
+/* ask email box End */
+
+
+.chat-main {
+  box-shadow: 5px 5px 20px #404040;
+}
+
+.header-one {
+  background: #404040;
+  height: 35px;
+}
+
+.name {
+  color: white;
+}
+
+.msg-box {
+  background: white;
+  font-size: 14px;
+}
+
+.msg-box input {
+  font-size: 14px;
+}
+
+.text-box {
+  height: 35px;
+  font-size: 1.2em;
+  background-color: #fafafa;
+}
+
+.text-input {
+  background-color: #fafafa;
+}
+
+.chats {
+  background: #ECEFF1;
+}
+
+.bot-message {
+  color: #333;
+  border-radius: 4px;
+  font-size: 14px;
+  background-color: white;
+  -webkit-box-shadow: 3px 3px 5px rgba(100, 100, 100, 0.1);
+  box-shadow: 3px 3px 5px rgba(100, 100, 100, 0.1);
+}
+
+.button-image {
+  margin-top: 4px;
+  padding: 4px;
+  width: 24px;
+}
+
+.busy-image-container {
+  margin-left: 20px;
+  width: 60px;
+}
+
+.busy-image {
+  width: 60px;
+}
+
+.name_white {
+  color: #fff;
 }

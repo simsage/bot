@@ -10,7 +10,6 @@ const typingCheckRate = 2000;
 
 
 class Bot {
-
     constructor(settings, update_ui) {
         this.ws_base = settings.ws_base;
         this.update_ui = update_ui;
@@ -31,8 +30,30 @@ class Bot {
         this.operatorTyping = false;
 
         // typing checking
-        this.typing_timer = null;
         this.typing_last_seen = 0;
+
+        // voice / speech
+        this.voice_enabled = settings.voice_enabled;
+
+        this.selected_kb = null;
+        this.selected_kbId = null;
+        this.selected_sid = null;
+    }
+
+    selectSource(name, kbId, sid) {
+        this.selected_kb = name;
+        this.selected_kbId = kbId;
+        this.selected_sid = sid;
+        this.message_list = [];  // reset conversation list
+        this.refresh();
+    }
+
+    clearSource() {
+        this.selected_kb = null;
+        this.selected_kbId = null;
+        this.selected_sid = null;
+        this.message_list = [];  // reset conversation list
+        this.refresh();
     }
 
     // connect to the system
@@ -68,14 +89,19 @@ class Bot {
             }
             console.log("ws-disconnected");
             setTimeout(this.ws_connect.bind(this), 5000); // try and re-connect as a one-off in 5 seconds
-
             // checking typing timeout
-            this.typing_timer = setInterval(this.typingTick.bind(this), typingCheckRate);
+            setInterval(this.typingTick.bind(this), typingCheckRate);
 
         } else {
             console.log("ws-connected");
             this.stompClient.debug = null;
         }
+        this.refresh();
+    }
+
+    toggleVoice(event) {
+        event.stopPropagation();
+        this.voice_enabled = !this.voice_enabled;
         this.refresh();
     }
 
@@ -109,7 +135,7 @@ class Bot {
     }
 
     // create a random guid
-    guid() {
+    static guid() {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
                 .toString(16)
@@ -120,10 +146,15 @@ class Bot {
 
     // get or create a session based client id for SimSage usage
     getClientId() {
-        var clientId = localStorage.getItem("bot_client_id");
+        var clientId = "";
+        if (localStorage && localStorage.getItem) {
+            clientId = localStorage.getItem("bot_client_id");
+        }
         if (!clientId || clientId.length === 0) {
-            clientId = this.guid();
-            localStorage.setItem("bot_client_id", clientId);
+            clientId = Bot.guid(); // create a new client id
+            if (localStorage && localStorage.setItem) {
+                localStorage.setItem("bot_client_id", clientId);
+            }
         }
         return clientId;
     }
@@ -142,16 +173,16 @@ class Bot {
     }
 
     static userMessageWrapper(text, urlList) {
-        return  "<div class=\"chatbox_body_message chatbox_body_message-right\">\n" +
-                "<img src=\"images/human.svg\" alt=\"you\">\n" +
-                "<div class='chatbox_body_inside'>" + text + Bot.linksToHtml(urlList) + "</div>" +
+        return "<div class=\"chatbox_body_message chatbox_body_message-right\">\n" +
+                "<div class=\"bot-human\" title=\"you said\"></div>\n" +
+                "<div class=\"bot-message\">" + text + Bot.linksToHtml(urlList) + "</div>\n" +
                 "</div>\n"
     }
 
     static simSageMessageWrapper(text, urlList) {
-        return  "<div class=\"chatbox_body_message chatbox_body_message-left\">\n" +
-                "<img src=\"images/tinman.svg\" alt=\"SimSage\">\n" +
-                "<div class='chatbox_body_inside'>" + text + Bot.linksToHtml(urlList) + "</div>" +
+        return "<div class=\"chatbox_body_message chatbox_body_message-left\">\n" +
+                "<div class=\"bot-machine\" title=\"SimSage said\"></div>\n" +
+                "<div class=\"bot-message\">" + text + Bot.linksToHtml(urlList) + "</div>\n" +
                 "</div>\n"
     }
 
@@ -160,24 +191,38 @@ class Bot {
     }
 
     static systemGetUserEmail() {
-        return  "<div class=\"email-ask\">" + bot_settings.email_message + "\n" +
-                "<input class='email-address' id='email' onkeypress='bot.sendEmailKey(event)' type='text' placeholder='name@email.com' />" +
-                "<a class='send-email-button' onclick='bot.sendEmail()'><img class='send-email-image' src='images/chevron-right.svg' alt='more information' title='send me more information' /></a>" +
+        return  "<div class=\"email-ask\">" +
+                    bot_settings.email_message + "\n" +
+                "<input class='email-address' id='email' onkeypress='bot.sendEmailKey(event)' type='text' placeholder='Email Address' />" +
+                "<div class='send-email-button' onclick='bot.sendEmail()' title='send email'></div></div>"
+    }
+
+    static sourcesTitle() {
+        return  "<div class=\"source-title\">please select a topic</div>\n"
+    }
+
+    static sourceItem(sourceItem) {
+        return  "<div class=\"source-item\" onclick='bot.selectSource(\"" + sourceItem.name + "\",\"" + sourceItem.kbId + "\",\"" + sourceItem.sid + "\");'>\n" +
+                sourceItem.name +
                 "</div>\n"
     }
 
     static convertToCSV(objArray) {
-        var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
-        var str = '';
-        for (var i = 0; i < array.length; i++) {
-            var line = '';
-            for (var j = 0; j < array[i].length; j++) {
+        let array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+        let str = '';
+        for (let i = 0; i < array.length; i++) {
+            let line = '';
+            for (let j = 0; j < array[i].length; j++) {
                 if (line.length > 0) line += '\t';
-                var text = array[i][j];
+                let text = array[i][j];
                 if (text && text.replace) {
-                    line += text.replace(/\t/g, '    ')
+                    text = text.replace(/\t/g, '    ')
                         .replace(/\n/g, ' ')
                         .replace(/\r/g, ' ');
+                    if (text.indexOf(',') >= 0) {
+                        text = '"' + text + '"';
+                    }
+                    line += text;
                 } else {
                     line += " ";
                 }
@@ -194,7 +239,7 @@ class Bot {
                 JSON.stringify({
                     'messageType': mt_Email,
                     'organisationId': settings.organisationId,
-                    'kbList': settings.kbList,
+                    'kbList': [{kbId: this.selected_kbId, sid: this.selected_sid}],
                     'clientId': this.getClientId(),
                     'emailAddress': emailAddress,
                 }));
@@ -213,7 +258,7 @@ class Bot {
 
     downloadConversation(event) {
         event.stopPropagation();
-        // perpare the data
+        // prepare the data
         const data = [];
         this.message_list.map((item) => {
             data.push([item.text, item.origin, item.time]);
@@ -226,10 +271,26 @@ class Bot {
         document.body.appendChild(downloadLink);
         downloadLink.click();
         document.body.removeChild(downloadLink);
+        return false;
     }
 
     messageListToHtml() {
-        var result = "";
+        // are we still selecting a chat topic?
+        if (this.selected_kb === null) {
+            if (settings.kbList.length === 1) {
+                this.selected_kb = settings.kbList[0].name;
+                this.selected_kbId = settings.kbList[0].kbId;
+                this.selected_sid = settings.kbList[0].sid;
+            } else if (settings.kbList.length > 1) {
+                let str = Bot.sourcesTitle();
+                for (const kb of settings.kbList) {
+                    str += Bot.sourceItem(kb);
+                }
+                return str;
+            }
+        }
+
+        var result = "<div style='padding: 10px;'><div/>";
         let lastMessageUser = false;
         this.message_list.map((item) => {
             if (item.text && item.origin === "simsage") {
@@ -247,6 +308,15 @@ class Bot {
             result += Bot.systemGetUserEmail();
         }
         return result;
+    }
+
+    // setup a chat topic?
+    setupChatTopic() {
+        if (this.selected_kb !== null && this.selected_kb !== undefined) {
+            return "<div class='chat-topic-text'>" + this.selected_kb + "</div>" +
+                "<div class='chat-topic-clear' onclick='bot.clearSource();' title='change topic'></div>";
+        }
+        return "";
     }
 
     static highlight(str) {
@@ -280,7 +350,7 @@ class Bot {
 
                     if (data.searchResult) {
                         this.message_list.push({
-                            "text": bot_settings.search_message,
+                            "text": bot_settings.no_result_message,
                             "origin": "simsage",
                             "urlList": [],
                             "imageList": [],
@@ -300,6 +370,16 @@ class Bot {
 
                     // do we want to ask for their email address?
                     this.askForEmailAddress = !this.hasResult && !this.knowEmail && bot_settings.ask_email;
+
+                    if (this.voice_enabled) {
+                        var synth = window.speechSynthesis;
+                        var voices = synth.getVoices();
+                        if (synth && voices && voices.length > 3) {
+                            var msg = new SpeechSynthesisUtterance(this.strip(data.text));
+                            msg.voice = voices[4];
+                            synth.speak(msg);
+                        }
+                    }
 
                     this.refresh();
                 }
@@ -328,6 +408,12 @@ class Bot {
         }
     }
 
+    // remove html tags using an invisible div
+    strip(html) {
+        var tmp = document.createElement("DIV");
+        tmp.innerHTML = html;
+        return tmp.textContent || tmp.innerText || "";
+    }
 
 }
 
