@@ -144,16 +144,30 @@ class Bot {
         return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
     }
 
+    // do we hav access to local-storage?
+    hasLocalStorage(){
+        try {
+            const test = 'test';
+            localStorage.setItem(test, test);
+            localStorage.removeItem(test);
+            return true;
+        } catch(e) {
+            return false;
+        }
+    }
+
     // get or create a session based client id for SimSage usage
     getClientId() {
-        var clientId = "";
-        if (localStorage && localStorage.getItem) {
-            clientId = localStorage.getItem("bot_client_id");
+        let clientId = "";
+        const key = 'bot_client_id';
+        const hasLs = this.hasLocalStorage();
+        if (hasLs) {
+            clientId = localStorage.getItem(key);
         }
         if (!clientId || clientId.length === 0) {
             clientId = Bot.guid(); // create a new client id
-            if (localStorage && localStorage.setItem) {
-                localStorage.setItem("bot_client_id", clientId);
+            if (hasLs) {
+                localStorage.setItem(key, clientId);
             }
         }
         return clientId;
