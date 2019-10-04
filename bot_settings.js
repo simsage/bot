@@ -11,5 +11,7 @@ bot_settings = {
     voice_enabled: false,
     // ask users for their email if nothing found?
     ask_email: true,
+    // and how sensitive the bot response should be
+    bot_threshold: 0.775,
 };
 

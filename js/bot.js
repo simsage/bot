@@ -412,7 +412,7 @@ class Bot {
                     'semanticSearch': bot_settings.semantic_search,
                     'query': text,
                     numResults: 1,
-                    scoreThreshold: 0.9
+                    scoreThreshold: bot_settings.bot_threshold,
                 }));
             this.hasResult = false;
             this.hasError = false;

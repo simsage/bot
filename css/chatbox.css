@@ -365,3 +365,24 @@
 .name_white {
   color: #fff;
 }
+
+/*
+    text highlighting for search results shown in bot window
+    hl1 = exact word hit, hl2 secondary language relation hit, hl3 lower importance hits
+*/
+
+.hl1 {
+    font-weight: 700;
+    background-color: #ffffa0;
+}
+
+.hl2 {
+    font-weight: 700;
+    background-color: #ddd;
+}
+
+.hl3 {
+    font-weight: 700;
+    background-color: #eee;
+}
+
