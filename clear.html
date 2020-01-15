@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SimSage Clear ID</title>
+
+    <script src="js/jquery-3.4.1.min.js"></script>
+    <script src="js/bot.js"></script>
+
+</head>
+<body>
+
+    <div id="clear">please wait...</div>
+
+</body>
+
+<script lang="javascript">
+    let clear = $("#clear");
+    if (Bot.clearClientId()) {
+        clear.html("success: session cleared.");
+    } else {
+        clear.html("failed: localStorage not available");
+    }
+</script>
+
+</html>

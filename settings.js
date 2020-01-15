@@ -9,7 +9,5 @@ settings = {
     ws_base: 'https://<server>/ws-api',
     // the organisation's id to search
     organisationId: "<organisation>",
-    // the knowledge bases inside this organisation to use
-    kbList: [{name: "<name>", kbId: "<kb>", sid: "<sid>"}],
 };
 

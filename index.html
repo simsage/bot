@@ -8,11 +8,13 @@
     <script src="js/stomp.js"></script>
 
     <script src="settings.js"></script>
-    <script src="bot_settings.js"></script>
+    <script src="ui_settings.js"></script>
+    <script src="js/template.js"></script>
+    <script src="js/simsage_common.js"></script>
     <script src="js/bot.js"></script>
 
     <link rel="stylesheet" type="text/css" href="css/material-icons.css" />
-    <link rel="stylesheet" type="text/css" href="css/chatbox.css" />
+    <link rel="stylesheet" type="text/css" href="css/bot.css" />
 
     <meta charset="UTF-8">
 </head>
@@ -34,7 +36,7 @@
                 <div class="name white">Ask SimSage</div>
                 <div id="voice" onclick="return bot.toggleVoice(event)"></div>
                 <div id="download-link" class="download" title="download your conversation" title="download conversation"
-                     onclick="return bot.downloadConversation(event)" style="display: none;">
+                     onclick="return bot.download_conversations(event)" style="display: none;">
                 </div>
             </div>
         </div>
@@ -53,7 +55,8 @@
             </div>
         </div>
     </div>
-    <script src="js/startup.js"></script>
+
+    <script src="js/setup.js"></script>
     <!-- SimSage Bot End -->
 </body>
 </html>
