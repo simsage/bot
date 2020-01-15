@@ -4,6 +4,11 @@ const query_box = $('#query');          // query entry system
 const voice_selector = $('#voice');     // voice selector
 const chat_list = $('#chat');           // chat window
 const chat_topic = $('#chat-topic');    // selected knowledge-base name
+const chat_cover = $(".chat-cover");     // menu selector and display
+
+// height to adjust too if menu is displayed
+const original_height = chat_list.height();
+const adjusted_height = chat_list.height() - 38;
 
 // ui update function
 function update_ui(bot) {
@@ -23,20 +28,23 @@ function update_ui(bot) {
 
     if (bot.is_connected) {
         if (bot.selected_kb_name === null) {
+            chat_list.height(original_height);
             query_box.attr("disabled", "true");
             query_box.attr("placeholder", "please select a topic...");
-            $(".chat-cover").hide();
+            chat_cover.hide();
         } else {
             query_box.removeAttr("disabled");
             query_box.attr("placeholder", "chat with SimSage");
             if (bot.kb_list.length > 1) {
-                $(".chat-cover").show();
+                chat_cover.show();
+                chat_list.height(adjusted_height);
             }
+            query_box.focus();
         }
     } else {
         query_box.attr("disabled", "true");
         query_box.attr("placeholder", "Not connected to SimSage...");
-        $(".chat-cover").hide();
+        chat_cover.hide();
     }
     // empty the query box if we got a result
     if (bot.has_result) {

@@ -101,6 +101,13 @@
     width: 100%;
 }
 
+.chat-topic-title {
+    margin-top: 10px;
+    margin-bottom: 20px;
+    margin-left: 30%;
+    font-size: 1.1em;
+}
+
 .chat-topic-text {
     float: left;
     padding: 4px;
@@ -111,7 +118,23 @@
 }
 
 .chat-topic-clear {
+    margin-top: 4px;
     float: right;
+}
+
+.chat-item {
+    margin-left: 25%;
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    width: 50%;
+    margin-bottom: 10px;
+    cursor: pointer;
 }
 
 .chat-topic-clear:before {
@@ -335,7 +358,7 @@
 }
 
 .chats {
-  background: #ECEFF1;
+    background: #ECEFF1;
 }
 
 .bot-message {

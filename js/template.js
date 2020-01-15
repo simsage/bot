@@ -16,7 +16,7 @@ function strip_html(html) {
 
 // render a single menu item for a knowledge-base for selecting one (name, kbId, sid)
 function render_kb_item(kb_item) {
-    const result_str = '<div class=\"source-item\" onclick=\'bot.select_kb(\"{kb-name}\",\"{kb-id}\",\"{kb-sid}\");\' />';
+    const result_str = '<div class=\"chat-item\" onclick=\'bot.select_kb(\"{kb-name}\",\"{kb-id}\",\"{kb-sid}\");\'>{kb-name}</div>';
     return result_str
         .replace(/{kb-name}/g, kb_item.name)
         .replace(/{kb-id}/g, kb_item.id)
@@ -25,7 +25,7 @@ function render_kb_item(kb_item) {
 
 // render the complete menu for a kb selection exercise
 function render_kb_menu(kb_list) {
-    const results = ["<div class=\"source-title\">please select a topic</div>"];
+    const results = ["<div class=\"chat-topic-title\">please select a topic</div>"];
     for (const kb of kb_list) {
         results.push(render_kb_item(kb));
     }
