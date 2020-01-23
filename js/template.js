@@ -46,41 +46,95 @@ function render_selected_kb_title(kb_name) {
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // bot conversations
 
-// render a set of urls in their appropriate boxes for a chat result
-function render_links(url_list) {
-    const links = [];
-    if (url_list && url_list.length > 0) {
-        links.push("<br/><div class='link-box'>");
-        for (const url of url_list) {
-            links.push("<div class='link'><a href='" + url + "' target='_blank'>" + url + "</a></div>");
+/**
+ * render a bot button
+ * @param text the text to display in the button
+ * @param action the action to perform
+ */
+function render_button(text, action) {
+    return "<div class='bot-button' title='" + text + "' onclick='" + action + "'>" + text + "</div>";
+}
+
+function render_buttons(buttons) {
+    if (buttons && buttons.length > 0) {
+        const list = [];
+        for (const button of buttons) {
+            list.push(render_button(button.text, button.action));
         }
-        links.push("</div>");
+        return list.join("\n");
     }
-    return links.join('\n');
+    return "";
+}
+
+// get a name from a url
+function get_url_name(url) {
+    if (url && url.length > 0) {
+        const i1 = url.lastIndexOf('/');
+        if (i1 > 0) {
+            const name = url.substring(i1 + 1).trim();
+            if (name.length === 0) {
+                const strip_list = ["http://www.", "https://www.", "http://", "https://"];
+                for (const strip of strip_list) {
+                    if (url.startsWith(strip)) {
+                        const subName = url.substring(strip.length);
+                        const i2 = subName.indexOf('.');
+                        if (i2 > 0) {
+                            return subName.substring(0, i2);
+                        }
+                        return name;
+                    }
+                }
+                return name;
+            }
+            const i2 = name.indexOf('.');
+            if (i2 > 0) {
+                return name.substring(0, i2);
+            }
+            return name;
+        }
+    }
+    return "no name";
+}
+
+function convert_to_buttons(url_list) {
+    const buttons = [];
+    if (url_list) {
+        for (const url of url_list) {
+            for (const sub_url of url.split(' ')) {
+                buttons.push({
+                    text: get_url_name(sub_url),
+                    action: 'bot.visit("' + sub_url + '");'
+                });
+            }
+        }
+    }
+    return buttons;
 }
 
 // a user's message
-function render_user_message(text, url_list) {
+function render_user_message(text, buttons) {
     const result = '\
             <div class="chatbox_body_message chatbox_body_message-right">\
                 <div class="bot-human" title="you said"></div>\
-                <div class="bot-message">{text}{links}</div>\
+                <div class="bot-message">{text}\
+                <div class="bot-buttons">{links}</div></div>\
             </div>';
     return result
         .replace(/{text}/g, text)
-        .replace(/{links}/g, render_links(url_list))
+        .replace(/{links}/g, render_buttons(buttons))
 }
 
 // simsage message
-function render_simsage_message(text, url_list) {
+function render_simsage_message(text, buttons) {
     const result = '\
             <div class="chatbox_body_message chatbox_body_message-left">\
                 <div class="bot-machine" title="SimSage said"></div>\
-                <div class="bot-message">{text}{links}</div>\
+                <div class="bot-message">{text}\
+                <div class="bot-buttons">{links}</div></div>\
             </div>';
     return result
         .replace(/{text}/g, text)
-        .replace(/{links}/g, render_links(url_list))
+        .replace(/{links}/g, render_buttons(buttons))
 }
 
 // render a busy message (animating dots)
@@ -96,22 +150,26 @@ function render_get_user_email() {
 }
 
 // render the complete bot message window content
-function render_bot_conversations(message_list, operator_typing, error, ask_for_email) {
+function render_bot_conversations(message_list, operator_typing, error, ask_for_email, asking_for_spelling) {
     const result = ["<div style='padding: 10px;'><div/>"];
    let lastMessageUser = false;
     message_list.map((item) => {
         if (item.text && item.origin === "simsage") {
-            result.push(render_simsage_message(item.text, item.urlList));
+            if (item.buttons && item.buttons.length > 0) {
+                result.push(render_simsage_message(item.text, item.buttons));
+            } else {
+                result.push(render_simsage_message(item.text, convert_to_buttons(item.urlList)));
+            }
             lastMessageUser = false;
         } else if (item.text) {
-            result.push(render_user_message(item.text, item.urlList));
+            result.push(render_user_message(item.text, convert_to_buttons(item.urlList)));
             lastMessageUser = true;
         }
     });
     if (lastMessageUser && error === '' && operator_typing) {
         result.push(render_simsage_busy());
     }
-    if (ask_for_email) {
+    if (ask_for_email && !asking_for_spelling) {
         result.push(render_get_user_email());
     }
     return result.join('\n');

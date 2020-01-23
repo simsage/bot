@@ -71,24 +71,25 @@
 .chatbox_body_message {
     position: relative;
     width: 94%;
-    margin-left: 3%;
 }
 
 .bot-message {
-    padding: 20px;
+    padding: 10px;
     margin-bottom: 10px;
 }
 
 .chatbox_body_message-right .bot-message {
+    overflow: hidden;
     margin-left: 15px;
-    padding-right: 30px;
+    padding-right: 5px;
     text-align: right;
 }
 
 
 .chatbox_body_message-left .bot-message {
+    overflow: hidden;
     margin-right: 15px;
-    padding-left: 30px;
+    padding-left: 5px;
     text-align: left;
 }
 
@@ -254,7 +255,7 @@
 
 .bot-human:before {
   padding-top: 15px;
-  margin-right: -20px;
+  margin-right: -1px;
   font-family: 'Material Icons', serif;
   float: right;
   color: dodgerblue;
@@ -264,7 +265,7 @@
 .bot-machine:before {
   padding-top: 15px;
   padding-left: 2px;
-  margin-left: -10px;
+  margin-left: -1px;
   font-family: 'Material Icons', serif;
   float: left;
   color: dodgerblue;
@@ -388,6 +389,32 @@
 .name_white {
   color: #fff;
 }
+
+/* buttons inside the chat window */
+
+.bot-buttons {
+    width: 100%;
+    min-height: 22px;
+    float: left;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-size: 0.9em;
+}
+
+.bot-button {
+    float: left;
+    padding: 5px;
+    border-radius: 2px;
+    background: #f5a623;
+    box-shadow: -2px 0 2px 1px #aaaaaa;
+    margin-right: 10px;
+    margin-bottom: 5px;
+    width: 100px;
+    height: 20px;
+    cursor: pointer;
+}
+
 
 /*
     text highlighting for search results shown in bot window

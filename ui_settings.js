@@ -21,5 +21,7 @@ ui_settings = {
     max_word_distance: 20,
     // score cut-off
     score_threshold: 0.0,
+    // correct typos?
+    use_spelling_suggest: true,
 };
 

@@ -5,6 +5,7 @@ const mt_Disconnect = "disconnect";
 const mt_Error = "error";
 const mt_Message = "message";
 const mt_Email = "email";
+const mt_SpellingSuggest = "spelling-suggest";
 
 const typingCheckRate = 2000;
 
@@ -15,6 +16,7 @@ class Bot extends SimSageCommon {
         this.update_ui = update_ui;
 
 	    this.message_list = [];  // conversation list
+        this.bot_buttons = [];
 
         // for chat box clear management
         this.has_result = true;
@@ -22,6 +24,7 @@ class Bot extends SimSageCommon {
         // do we know this user's email?
         this.knowEmail = false;
         this.askForEmailAddress = false;
+        this.asking_for_spelling = false;
 
         // is the operator busy typing?
         this.operatorTyping = false;
@@ -72,6 +75,7 @@ class Bot extends SimSageCommon {
                 'fragmentCount': ui_settings.fragment_count,
                 'maxWordDistance': ui_settings.max_word_distance,
                 'searchThreshold': ui_settings.score_threshold,
+                'spellingSuggest': ui_settings.use_spelling_suggest,
                 'sourceId': '', // no source filter for the bot
             };
 
@@ -104,7 +108,23 @@ class Bot extends SimSageCommon {
                     this.has_result = false;
                     this.refresh();
 
-                } else if (data.messageType === mt_Message) {
+                } else if (data.messageType === mt_SpellingSuggest) {
+
+                    console.log(data);
+
+                    const buttons = [];
+                    buttons.push({text: "yes", action: 'bot.correct_spelling("' + data.text + '");'});
+                    buttons.push({text: "no", action: 'bot.no_to_spelling();'});
+                    this.asking_for_spelling = true;
+
+                    this.message_list.push({
+                        "text": "Did you mean: " + data.text, "origin": "simsage",
+                        "buttons": buttons, "urlList": [], "imageList": [], "time": new Date()
+                    });
+
+                    this.refresh();
+
+                } else if (data.messageType === mt_Message && !this.asking_for_spelling) {
 
                     console.log(data);
                     this.error = ''; // no errors
@@ -255,10 +275,30 @@ class Bot extends SimSageCommon {
     conversation_html() {
         const kb_menu_html = this.kb_menu();
         if (kb_menu_html === '') {
-            return render_bot_conversations(this.message_list, this.operatorTyping, this.error, this.askForEmailAddress);
+            return render_bot_conversations(this.message_list, this.operatorTyping, this.error,
+                                            this.askForEmailAddress, this.asking_for_spelling);
         } else {
             return kb_menu_html;
         }
+    }
+
+    // open the selected url
+    visit(url) {
+        if (url && url.length > 0) {
+            window.open(url, '_blank');
+        }
+    }
+
+    // correct the spelling
+    correct_spelling(text) {
+        this.asking_for_spelling = false;
+        $("#query").val(text);
+        this.query(text);
+    }
+
+    no_to_spelling() {
+        this.asking_for_spelling = false;
+        this.refresh();
     }
 
     // do we need to render a kb-menu?  empty string if not, otherwise the html string for it
