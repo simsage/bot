@@ -34,8 +34,11 @@
             <div class="header-one">
                 <div id="status" class="simsage-disconnected" title="SimSage is offline"></div>
                 <div class="name white">Ask SimSage</div>
+                <div id="operator" onclick="event.stopPropagation(); bot.getOperatorHelp()" class="operator-button-box" title="contact operator" style="display: none;">
+                    <img src="images/operator.svg" alt="contact operator" class="operator-image">
+                </div>
                 <div id="voice" onclick="return bot.toggleVoice(event)"></div>
-                <div id="download-link" class="download" title="download your conversation" title="download conversation"
+                <div id="download-link" class="download" title="download your conversation"
                      onclick="return bot.download_conversations(event)" style="display: none;">
                 </div>
             </div>

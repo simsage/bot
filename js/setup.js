@@ -1,7 +1,9 @@
 // controls used / manipulated by this setup
+
 const status_ctrl = $('#status');       // bot status icon
 const query_box = $('#query');          // query entry system
 const voice_selector = $('#voice');     // voice selector
+const btn_operator = $("#operator");    // contact operator button
 const chat_list = $('#chat');           // chat window
 const chat_topic = $('#chat-topic');    // selected knowledge-base name
 const chat_cover = $(".chat-cover");     // menu selector and display
@@ -26,14 +28,21 @@ function update_ui(bot) {
     // generate the active kb item name
     chat_topic.html(bot.selected_kb_title());
 
+    // show operator?
+    if (ui_settings.can_contact_ops_direct) {
+        btn_operator.show();
+    }
+
     if (bot.is_connected) {
         if (bot.selected_kb_name === null) {
             chat_list.height(original_height);
             query_box.attr("disabled", "true");
+            btn_operator.attr("disabled", "true");
             query_box.attr("placeholder", "please select a topic...");
             chat_cover.hide();
         } else {
             query_box.removeAttr("disabled");
+            btn_operator.removeAttr("disabled");
             query_box.attr("placeholder", "chat with SimSage");
             if (bot.kb_list.length > 1) {
                 chat_cover.show();
@@ -91,6 +100,7 @@ function keyPress(event) {
 
 // connect the bot to simsage when the page is ready to do so
 $(document).ready(function() {
+    bot.getKbs();
     bot.ws_connect(); // connect to SimSage
     // minimize the bot window initially
     $('.chat-content').slideToggle();

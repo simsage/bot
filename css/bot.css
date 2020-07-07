@@ -189,6 +189,23 @@
 
 /* Voice End */
 
+/* Operator start */
+
+.operator-button-box {
+    float: right;
+    padding: 2px;
+    width: 40px;
+    height: 40px;
+    cursor: pointer;
+}
+
+.operator-image {
+    margin-left: 6px;
+    margin-top: 8px;
+    width: 20px;
+    color: #fff;
+}
+
 /* connected / disconnected Start */
 
 .simsage-connected {
@@ -394,7 +411,7 @@
 
 .bot-buttons {
     width: 100%;
-    min-height: 22px;
+    min-height: 26px;
     float: left;
     margin-top: 5px;
     margin-bottom: 5px;
@@ -404,14 +421,14 @@
 
 .bot-button {
     float: left;
-    padding: 5px;
+    padding: 2px;
     border-radius: 2px;
     background: #f5a623;
     box-shadow: -2px 0 2px 1px #aaaaaa;
     margin-right: 10px;
     margin-bottom: 5px;
     width: 100px;
-    height: 20px;
+    height: 24px;
     cursor: pointer;
 }
 

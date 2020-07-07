@@ -58,7 +58,11 @@ class Bot extends SimSageCommon {
 
     // perform a bot query - ask SimSage
     query(text) {
-        if (this.is_connected && text.length > 0 && this.selected_kbId) {
+        if (text.length > 0 && this.selected_kbId && this.selected_kbId.length > 0) {
+            const url = settings.base_url + '/ops/query';
+            const self = this;
+            this.error = '';
+
             const clientQuery = {
                 'organisationId': settings.organisationId,
                 'kbList': [{'kbId': this.selected_kbId, 'sid': this.selected_sid}],
@@ -79,11 +83,44 @@ class Bot extends SimSageCommon {
                 'sourceId': '', // no source filter for the bot
             };
 
+            jQuery.ajax({
+                headers: {
+                    'Content-Type': 'application/json',
+                    'API-Version': ui_settings.api_version,
+                },
+                'data': JSON.stringify(clientQuery),
+                'type': 'POST',
+                'url': url,
+                'dataType': 'json',
+                'success': function (data) {
+                    if (!self.is_connected) { // only force display of result if not connected through web socket
+                        self.receive_ws_data(data);
+                    }
+                }
+
+            }).fail(function (err) {
+                console.error(JSON.stringify(err));
+                if (err && err["readyState"] === 0 && err["status"] === 0) {
+                    self.error = "Server not responding, not connected.";
+                } else {
+                    self.error = err;
+                }
+                self.busy = false;
+                self.refresh();
+            });
+
             // construct a client query (OpsModels.ClientQuery)
-            this.send_message("/ws/ops/query", clientQuery);
-            this.message_list.push({"text": text, "origin": "user", "time": new Date()});
+            this.message_list.push({"text": text, "origin": "user", "time": new Date(), "showBusy": false});
             this.refresh();
         }
+    }
+
+    pause(millis) {
+        const date = new Date();
+        let curDate = null;
+        do {
+            curDate = new Date();
+        } while(curDate - date < millis);
     }
 
     // overwrite: receive data back from the system
@@ -118,7 +155,7 @@ class Bot extends SimSageCommon {
                     this.asking_for_spelling = true;
 
                     this.message_list.push({
-                        "text": "Did you mean: " + data.text, "origin": "simsage",
+                        "text": "Did you mean: " + data.text, "origin": "simsage", "showBusy": false,
                         "buttons": buttons, "urlList": [], "imageList": [], "time": new Date()
                     });
 
@@ -126,13 +163,12 @@ class Bot extends SimSageCommon {
 
                 } else if (data.messageType === mt_Message && !this.asking_for_spelling) {
 
-                    console.log(data);
                     this.error = ''; // no errors
                     let speak_text = ''; // nothing to say (yet)
 
                     if (data.text && data.text.length > 0) {
                         this.message_list.push({
-                            "text": SimSageCommon.highlight(data.text), "origin": "simsage",
+                            "text": SimSageCommon.highlight(data.text), "origin": "simsage", "showBusy": false,
                             "urlList": data.urlList, "imageList": data.imageList, "time": new Date()
                         });
                         speak_text = strip_html(data.text);
@@ -143,21 +179,36 @@ class Bot extends SimSageCommon {
                         this.message_list.push({
                             "text": ui_settings.no_result_message,
                             "origin": "simsage",
+                            "showBusy": false,
                             "urlList": [],
                             "imageList": [],
                             "time": new Date()
                         });
 
-                        // and add the result text as a result
                         this.message_list.push({
-                            "text": SimSageCommon.highlight(data.resultList[0].textList[0]),
+                            "text": "",
                             "origin": "simsage",
                             "urlList": [],
                             "imageList": [],
-                            "time": new Date()
+                            "time": new Date(),
+                            "showBusy": true,
                         });
 
                         this.has_result = true;
+
+                        const self = this;
+                        setTimeout(() => {
+                            // and add the result text as a result
+                            self.message_list.push({
+                                "text": SimSageCommon.highlight(data.resultList[0].textList[0]),
+                                "origin": "simsage",
+                                "urlList": [data.resultList[0].url],
+                                "imageList": [],
+                                "time": new Date(),
+                                "showBusy": false,
+                            });
+                            self.refresh()
+                        }, 2000);
 
                     } else {
                         // no bot and no search results

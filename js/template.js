@@ -11,7 +11,7 @@ function strip_html(html) {
     return tmp.textContent || tmp.innerText || "";
 }
 
-///////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////render_simsage_busy/////////////////////////////////////////////
 // knowledge base selection menu
 
 // render a single menu item for a knowledge-base for selecting one (name, kbId, sid)
@@ -93,7 +93,7 @@ function get_url_name(url) {
             return name;
         }
     }
-    return "no name";
+    return url;
 }
 
 function convert_to_buttons(url_list) {
@@ -101,10 +101,12 @@ function convert_to_buttons(url_list) {
     if (url_list) {
         for (const url of url_list) {
             for (const sub_url of url.split(' ')) {
-                buttons.push({
-                    text: get_url_name(sub_url),
-                    action: 'bot.visit("' + sub_url + '");'
-                });
+                if (sub_url.trim().length > 0) {
+                    buttons.push({
+                        text: get_url_name(sub_url),
+                        action: 'bot.visit("' + sub_url + '");'
+                    });
+                }
             }
         }
     }
@@ -154,23 +156,30 @@ function render_bot_conversations(message_list, operator_typing, error, ask_for_
     const result = ["<div style='padding: 10px;'><div/>"];
    let lastMessageUser = false;
     message_list.map((item) => {
-        if (item.text && item.origin === "simsage") {
-            if (item.buttons && item.buttons.length > 0) {
-                result.push(render_simsage_message(item.text, item.buttons));
-            } else {
-                result.push(render_simsage_message(item.text, convert_to_buttons(item.urlList)));
+        if (!item.showBusy) {
+            if (item.text && item.origin === "simsage") {
+                if (item.buttons && item.buttons.length > 0) {
+                    result.push(render_simsage_message(item.text, item.buttons));
+                } else {
+                    result.push(render_simsage_message(item.text, convert_to_buttons(item.urlList)));
+                }
+                lastMessageUser = false;
+            } else if (item.text) {
+                result.push(render_user_message(item.text, convert_to_buttons(item.urlList)));
+                lastMessageUser = true;
             }
-            lastMessageUser = false;
-        } else if (item.text) {
-            result.push(render_user_message(item.text, convert_to_buttons(item.urlList)));
-            lastMessageUser = true;
         }
     });
-    if (lastMessageUser && error === '' && operator_typing) {
+    // does the last message have showBusy?
+    if ((message_list.length > 0 && message_list[message_list.length - 1].showBusy) || (lastMessageUser && error === '' && operator_typing)) {
         result.push(render_simsage_busy());
     }
     if (ask_for_email && !asking_for_spelling) {
         result.push(render_get_user_email());
+    }
+    // display an error message?
+    if (error.length > 0) {
+        result.push(render_simsage_message(error, []));
     }
     return result.join('\n');
 }

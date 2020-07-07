@@ -5,6 +5,7 @@
 class SimSageCommon {
 
     constructor() {
+        this.was_connected = false; // previous connection state
         this.is_connected = false;    // connected to endpoint?
         this.stompClient = null;      // the connection
         this.ws_base = settings.ws_base;    // endpoint
@@ -16,6 +17,7 @@ class SimSageCommon {
         // kb information
         this.kb_list = [];
         this.kb = null;
+        this.domainId = ''; // the selected domain
     }
 
     // do nothing - overwritten
@@ -26,6 +28,11 @@ class SimSageCommon {
     // do nothing - overwritten
     receive_ws_data() {
         console.error('receive_ws_data() not overwritten');
+    }
+
+    // close the error dialog - remove any error settings
+    close_error() {
+        this.error = '';
     }
 
     // connect to SimSage
@@ -50,6 +57,7 @@ class SimSageCommon {
     }
 
     set_connected(is_connected) {
+        console.log('is_connected:' + is_connected);
         this.is_connected = is_connected;
         if (!is_connected) {
             if (this.stompClient !== null) {
@@ -63,13 +71,10 @@ class SimSageCommon {
             this.connection_retry_count += 1;
 
         } else {
+            this.was_connected = false;
             this.error = '';
             this.connection_retry_count = 1;
             this.stompClient.debug = null;
-            // do we need to get the kb_list for the filters?
-            if (this.kb_list.length === 0) {
-                this.getKbs(); // get required kb information
-            }
         }
         this.refresh();
     }
@@ -79,6 +84,30 @@ class SimSageCommon {
             this.error = '';
             this.stompClient.send(endPoint, {}, JSON.stringify(data));
         }
+    }
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    // domain helpers
+
+    // return a list of domains (or empty list) for the selected kb
+    getDomainListForCurrentKB() {
+        if (this.kb && this.kb.domainList) {
+            return this.kb.domainList;
+        }
+        return [];
+    }
+
+    setup_domains() {
+        const ctrl = $("#ddDomain");
+        let html_str = "";
+        const domain_list = this.getDomainListForCurrentKB();
+        for (const domain of domain_list) {
+            html_str += "<option value='" + domain.domainId + "'>" + domain.name + "</option>";
+        }
+        if (domain_list.length > 0) {
+            this.domainId = domain_list[0].domainId;
+        }
+        ctrl.html(html_str);
     }
 
     // get the knowledge-base information for this organisation (set in settings.js)
@@ -103,6 +132,7 @@ class SimSageCommon {
                 self.kb_list = data.kbList;
                 if (self.kb_list.length > 0) {
                     self.kb = self.kb_list[0];
+                    self.setup_domains();
                 }
                 self.error = "";
                 self.connection_retry_count = 1;
@@ -110,13 +140,64 @@ class SimSageCommon {
                 self.refresh();
             }
 
-        })
-        .fail(function (err) {
+        }).fail(function (err) {
             console.error(JSON.stringify(err));
             if (err && err["readyState"] === 0 && err["status"] === 0) {
                 self.error = "Server not responding, not connected.  Trying again in 5 seconds...  [try " + self.connection_retry_count + "]";
                 self.connection_retry_count += 1;
                 window.setTimeout(() => self.getKbs(), 5000);
+            } else {
+                self.error = err;
+            }
+            self.busy = false;
+            self.refresh();
+        });
+    }
+
+
+    // ask the platform to provide access to an operator now
+    getOperatorHelp() {
+        const self = this;
+        const url = settings.base_url + '/ops/contact/operator';
+        const kb_list = [];
+        for (const kb of this.kb_list) {
+            kb_list.push({"kbId": kb.id, "sid": kb.sid});
+        }
+        const data = {
+            "organisationId": settings.organisationId,
+            "kbList": kb_list,
+            "clientId": SimSageCommon.getClientId(),
+        };
+
+        this.error = '';
+        this.busy = true;
+
+        this.refresh(); // notify ui
+
+        jQuery.ajax({
+            headers: {
+                'Content-Type': 'application/json',
+                'API-Version': settings.api_version,
+            },
+            'type': 'POST',
+            'data': JSON.stringify(data),
+            'url': url,
+            'dataType': 'json',
+            'success': function (data) {
+                // no organisationId - meaning - no operator available
+                if (!data.organisationId || data.organisationId.length === 0) {
+                    self.error = ui_settings.operator_message;
+                } else {
+                    self.error = "";
+                }
+                self.busy = false;
+                self.refresh();
+            }
+
+        }).fail(function (err) {
+            console.error(JSON.stringify(err));
+            if (err && err["readyState"] === 0 && err["status"] === 0) {
+                self.error = "Server not responding, not connected.";
             } else {
                 self.error = err;
             }
@@ -204,6 +285,32 @@ class SimSageCommon {
             str += ' ' + item;
         }
         return str.trim();
+    }
+
+    // if this is a syn-set and its selections, return those
+    static getSynSet(context_item) {
+        if (context_item.synSetLemma && context_item.synSetLemma.length > 0 && context_item.synSetCloud) {
+            const word = context_item.synSetLemma;
+            return {"word": word.toLowerCase().trim(), "clouds": context_item.synSetCloud};
+        }
+        return null;
+    }
+
+    // return the unique list of words in text_str as a list
+    static getUniqueWordsAsList(text_str) {
+        const parts = text_str.split(" ");
+        const newList = [];
+        const duplicates = {};
+        for (const _part of parts) {
+            const part = _part.trim().toLowerCase();
+            if (part.length > 0) {
+                if (!duplicates.hasOwnProperty(part)) {
+                    duplicates[part] = 1;
+                    newList.push(_part.trim());
+                }
+            }
+        }
+        return newList;
     }
 
 }
