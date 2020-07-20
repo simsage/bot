@@ -79,13 +79,6 @@ class SimSageCommon {
         this.refresh();
     }
 
-    send_message(endPoint, data) {
-        if (this.is_connected) {
-            this.error = '';
-            this.stompClient.send(endPoint, {}, JSON.stringify(data));
-        }
-    }
-
     /////////////////////////////////////////////////////////////////////////////////////////
     // domain helpers
 

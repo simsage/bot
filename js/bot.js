@@ -37,14 +37,12 @@ class Bot extends SimSageCommon {
 
         this.selected_kb_name = null;
         this.selected_kbId = null;
-        this.selected_sid = null;
     }
 
     // ui (bot multi-kb menu) selects a new item - set it as such
-    select_kb(name, kbId, sid) {
+    select_kb(name, kbId) {
         this.selected_kb_name = name;
         this.selected_kbId = kbId;
-        this.selected_sid = sid;
         this.message_list = [];  // reset conversation list
         this.refresh();
     }
@@ -65,7 +63,7 @@ class Bot extends SimSageCommon {
 
             const clientQuery = {
                 'organisationId': settings.organisationId,
-                'kbList': [{'kbId': this.selected_kbId, 'sid': this.selected_sid}],
+                'kbList': [this.selected_kbId],
                 'clientId': SimSageCommon.getClientId(),
                 'query': text,              // search query
                 'queryText': text,          // raw text
@@ -78,7 +76,6 @@ class Bot extends SimSageCommon {
                 'shardSizeList': [],
                 'fragmentCount': ui_settings.fragment_count,
                 'maxWordDistance': ui_settings.max_word_distance,
-                'searchThreshold': ui_settings.score_threshold,
                 'spellingSuggest': ui_settings.use_spelling_suggest,
                 'sourceId': '', // no source filter for the bot
             };
@@ -133,6 +130,10 @@ class Bot extends SimSageCommon {
                 this.refresh();
 
             } else if (data.messageType === mt_Disconnect) {
+                this.refresh();
+
+            } else if (data.messageType === mt_Email) {
+                this.knowEmail = true;
                 this.refresh();
 
             } else {
@@ -279,19 +280,42 @@ class Bot extends SimSageCommon {
     }
 
     send_email() {
-        let emailAddress = $("#email").val();
+        let emailAddress = document.getElementById("email").value;
         if (emailAddress && emailAddress.length > 0 && emailAddress.indexOf("@") > 0) {
-            this.stompClient.send("/ws/ops/email", {},
-                JSON.stringify({
-                    'messageType': mt_Email,
-                    'organisationId': settings.organisationId,
-                    'kbList': [{kbId: this.selected_kbId, sid: this.selected_sid}],
-                    'clientId': SimSageCommon.getClientId(),
-                    'emailAddress': emailAddress,
-                }));
             this.error = '';
-            this.has_result = false;
-            this.knowEmail = true;
+            const self = this;
+            const url = settings.base_url + '/ops/email';
+            this.searching = false;  // we're not performing a search
+            const emailMessage = {
+                'messageType': mt_Email,
+                'organisationId': settings.organisationId,
+                'kbList': [this.kb.id],
+                'clientId': SemanticSearch.getClientId(),
+                'emailAddress': emailAddress,
+            };
+            jQuery.ajax({
+                headers: {
+                    'Content-Type': 'application/json',
+                    'API-Version': ui_settings.api_version,
+                },
+                'data': JSON.stringify(emailMessage),
+                'type': 'POST',
+                'url': url,
+                'dataType': 'json',
+                'success': function (data) {
+                    self.receive_ws_data(data);
+                }
+
+            }).fail(function (err) {
+                console.error(JSON.stringify(err));
+                if (err && err["readyState"] === 0 && err["status"] === 0) {
+                    self.error = "Server not responding, not connected.";
+                } else {
+                    self.error = err;
+                }
+                self.busy = false;
+                self.refresh();
+            });
             this.refresh();
         }
     }
@@ -357,10 +381,9 @@ class Bot extends SimSageCommon {
         if (this.selected_kb_name === null) {
             // single knowledge-base - we don't need to ask - just select it
             if (this.kb_list.length === 1) {
-                this.select_kb(this.kb_list[0].name, this.kb_list[0].id, this.kb_list[0].sid);
+                this.select_kb(this.kb_list[0].name, this.kb_list[0].id);
                 this.selected_kb_name = this.kb_list[0].name;
                 this.selected_kbId = this.kb_list[0].id;
-                this.selected_sid = this.kb_list[0].sid;
 
             } else if (this.kb_list.length > 1) {
                 // multiple knowledge base selection menu
@@ -379,7 +402,6 @@ class Bot extends SimSageCommon {
     reset_kbs() {
         this.selected_kb_name = null;
         this.selected_kbId = null;
-        this.selected_sid = null;
         this.message_list = [];  // reset conversation list
         this.refresh();
     }

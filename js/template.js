@@ -16,11 +16,10 @@ function strip_html(html) {
 
 // render a single menu item for a knowledge-base for selecting one (name, kbId, sid)
 function render_kb_item(kb_item) {
-    const result_str = '<div class=\"chat-item\" onclick=\'bot.select_kb(\"{kb-name}\",\"{kb-id}\",\"{kb-sid}\");\'>{kb-name}</div>';
+    const result_str = '<div class=\"chat-item\" onclick=\'bot.select_kb(\"{kb-name}\",\"{kb-id}\");\'>{kb-name}</div>';
     return result_str
         .replace(/{kb-name}/g, kb_item.name)
-        .replace(/{kb-id}/g, kb_item.id)
-        .replace(/{kb-sid}/g, kb_item.sid);
+        .replace(/{kb-id}/g, kb_item.id);
 }
 
 // render the complete menu for a kb selection exercise
